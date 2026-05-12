@@ -1078,6 +1078,96 @@ body::before {
 .plan-dur-input:focus { border-color: var(--accent); }
 .plan-dur-label { font-size: 11px; color: var(--faint); }
 
+/* ── Block mode toggle (settings) ── */
+.block-mode-toggle { display: flex; border: 1px solid var(--border2); border-radius: var(--radius-sm); overflow: hidden; width: fit-content; }
+.bmt-opt {
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600;
+  padding: 9px 22px; border: none; background: none; color: var(--muted); cursor: pointer;
+  transition: background .15s, color .15s; position: relative;
+}
+.bmt-opt.bmt-active { background: var(--accent); color: #FDFBF7; }
+.bmt-opt:not(.bmt-active):hover { background: var(--surface2); color: var(--text); }
+.bmt-desc { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+/* ── Pause button ── */
+.btn-pause {
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 15px 18px; background: none; border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); color: var(--muted); cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+  display: flex; align-items: center; gap: 7px;
+}
+.btn-pause:hover { color: var(--text); border-color: var(--border2); }
+.btn-pause.paused { background: var(--amber-lt); border-color: var(--amber); color: var(--amber); }
+
+/* Hard mode countdown urgency */
+.timer-num.hard-warn { color: var(--amber); }
+.timer-num.hard-urgent { color: var(--red); animation: pulse 1s ease infinite; }
+
+/* ── Block complete modal ── */
+.block-complete-backdrop {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(42,40,32,0.55); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  animation: fadeIn .2s ease both;
+}
+.block-complete-backdrop.open { display: flex; }
+.block-complete-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 36px 38px 32px;
+  width: 100%; max-width: 420px; box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+  animation: slideUp .25s ease both;
+}
+.bc-icon { font-size: 36px; margin-bottom: 12px; }
+.bc-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.bc-task { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 400; line-height: 1.4; }
+.bc-time { font-size: 12px; color: var(--faint); margin-bottom: 26px; }
+.bc-time strong { color: var(--muted); font-weight: 600; }
+.bc-btns { display: flex; flex-direction: column; gap: 10px; }
+.btn-bc-yes {
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600;
+  padding: 14px 20px; background: var(--accent); color: #FDFBF7;
+  border: none; border-radius: var(--radius-sm); cursor: pointer;
+  transition: background .15s, transform .1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-bc-yes:hover { background: var(--accent-d); }
+.btn-bc-yes:active { transform: scale(.98); }
+.btn-bc-no {
+  font-family: 'Nunito', sans-serif; font-size: 13.5px; font-weight: 500;
+  padding: 13px 20px; background: var(--surface2); color: var(--text);
+  border: 1px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.btn-bc-no:hover { background: var(--bg); }
+.btn-bc-no:active { transform: scale(.98); }
+.bc-note { font-size: 11.5px; color: var(--faint); text-align: center; margin-top: 10px; line-height: 1.5; }
+
+/* ── In progress badge ── */
+.badge-wip { background: var(--amber-lt); color: var(--amber); border: 1px solid rgba(196,137,42,.25); font-size: 10.5px; font-weight: 600; padding: 2px 9px; border-radius: 100px; white-space: nowrap; }
+
+/* ── Time log detail row ── */
+.tr-detail-row {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg); display: none;
+  padding: 12px 16px 14px 44px;
+  animation: fadeIn .15s ease both;
+}
+.tr-detail-row.open { display: block; }
+.tdr-label { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+.tdr-empty { font-size: 12px; color: var(--faint); }
+.tdr-entries { display: flex; flex-direction: column; gap: 5px; }
+.tdr-entry { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.tdr-who { font-weight: 600; color: var(--text); min-width: 70px; }
+.tdr-dur { color: var(--muted); min-width: 60px; }
+.tdr-date { color: var(--faint); }
+.btn-expand-log {
+  background: none; border: none; cursor: pointer; padding: 0 4px; color: var(--faint);
+  font-size: 11px; display: inline-flex; align-items: center; gap: 4px;
+  transition: color .15s; font-family: 'Nunito', sans-serif; font-weight: 600;
+}
+.btn-expand-log:hover { color: var(--muted); }
+
 /* reorder arrows */
 .plan-arrows { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
 .plan-arrow {
@@ -1167,6 +1257,26 @@ body::before {
   </div>
 </div>
 
+
+<!-- BLOCK COMPLETE MODAL -->
+<div class="block-complete-backdrop" id="blockCompleteModal">
+  <div class="block-complete-box">
+    <div class="bc-icon" id="bcIcon">✅</div>
+    <div class="bc-title" id="bcTitle">Block finished!</div>
+    <div class="bc-task" id="bcTask"></div>
+    <div class="bc-time" id="bcTime"></div>
+    <div class="bc-btns">
+      <button class="btn-bc-yes" onclick="blockCompleteYes()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8l4 4 6-7" stroke="#FDFBF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Yes — mark task as done
+      </button>
+      <button class="btn-bc-no" onclick="blockCompleteNo()">Not quite — mark as in progress</button>
+    </div>
+    <div class="bc-note" id="bcNote">Time spent has been logged to this task.</div>
+  </div>
+</div>
 
 <!-- PLANNING SCREEN -->
 <div id="planScreen">
@@ -1410,7 +1520,7 @@ body::before {
             </div>
             <div class="timer-wrap">
               <div class="timer-num" id="timerNum">0:00</div>
-              <div class="timer-label">elapsed</div>
+              <div class="timer-label" id="timerLabel">elapsed</div>
             </div>
           </div>
           <div class="block-progress-row">
@@ -1418,13 +1528,20 @@ body::before {
             <div class="block-pct" id="blockPct">0%</div>
           </div>
           <div class="action-row">
-            <button class="btn-end" onclick="endBlock()">
+            <button class="btn-end" id="btnEndBlock" onclick="endBlock()">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8l4 4 6-7" stroke="#FDFBF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              End block — start next
+              <span id="btnEndLabel">Complete block</span>
             </button>
-            <button class="btn-skip" onclick="skipBlock()">Skip to later</button>
+            <button class="btn-pause" id="btnPause" onclick="togglePause()" style="display:none">
+              <svg id="pauseIcon" width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <rect x="2" y="2" width="3.5" height="10" rx="1" fill="currentColor"/>
+                <rect x="8.5" y="2" width="3.5" height="10" rx="1" fill="currentColor"/>
+              </svg>
+              <span id="pauseLabel">Pause</span>
+            </button>
+            <button class="btn-skip" onclick="skipBlock()">Skip</button>
           </div>
         </div>
         <div class="next-strip" id="nextStrip">
@@ -1601,6 +1718,17 @@ body::before {
                 <option value="mon">Monday</option>
                 <option value="sun">Sunday</option>
               </select>
+            </div>
+            <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+              <div>
+                <div class="setting-label">Block mode</div>
+                <div class="setting-desc">Controls how all of your time blocks behave</div>
+              </div>
+              <div class="block-mode-toggle">
+                <button class="bmt-opt" id="bmtSoft" onclick="setBlockMode('soft')">Soft block</button>
+                <button class="bmt-opt" id="bmtHard" onclick="setBlockMode('hard')">Hard block</button>
+              </div>
+              <div class="bmt-desc" id="bmtDesc"></div>
             </div>
           </div>
         </div>
@@ -2112,6 +2240,10 @@ var timerInterval = null;
 var blockSeconds  = 0;
 var activeTab     = 'day';
 var taskFilter    = 'all';
+var isPaused      = false;
+var pausedAt      = null;
+var totalPausedMs = 0;
+var blockCompleteCallback = null;
 
 /* ── hoisted project/log declarations (used by seedTasks below) ── */
 var PROJECT_COLORS = [
@@ -2324,44 +2456,228 @@ function renderQueue() {
 /* ════════════════════════════════════════
    TIMER
 ════════════════════════════════════════ */
+function getBlockMode() {
+  return (settings.general && settings.general.blockMode) || 'soft';
+}
+
 function startBlock() {
   clearInterval(timerInterval);
+  isPaused = false; pausedAt = null; totalPausedMs = 0;
   blockSeconds = 0; blockStart = Date.now();
   var block = queue[currentIdx];
   if (!block) return;
   block.status = 'active';
+
+  var isHard = getBlockMode() === 'hard';
+  var timerNum   = document.getElementById('timerNum');
+  var timerLabel = document.getElementById('timerLabel');
+  var btnPause   = document.getElementById('btnPause');
+  var btnEndLbl  = document.getElementById('btnEndLabel');
+
   document.getElementById('activeTitle').textContent = block.title;
-  document.getElementById('activeSub').textContent   = block.dur + ' min block · Started ' + fmtTime(new Date()) + (block.sharedTask && block.assignees && block.assignees.length ? ' · Shared with ' + block.assignees.filter(function(n){return n !== currentUser;}).join(', ') : '');
-  /* broadcast to team panel via Supabase */
+  document.getElementById('activeSub').textContent   =
+    (isHard ? 'Hard block · ' : 'Soft block · ') +
+    block.dur + ' min' +
+    ' · Started ' + fmtTime(new Date()) +
+    (block.sharedTask && block.assignees && block.assignees.length
+      ? ' · Shared with ' + block.assignees.filter(function(n){return n !== currentUser;}).join(', ')
+      : '');
+
+  if (timerNum)   timerNum.className  = 'timer-num';
+  if (timerLabel) timerLabel.textContent = isHard ? 'remaining' : 'elapsed';
+  if (btnPause)   btnPause.style.display = isHard ? 'none' : 'flex';
+  if (btnEndLbl)  btnEndLbl.textContent  = isHard ? 'End block early' : 'Complete block';
+
   if (currentUser) dbSetStatus(currentUser, block.title, true);
   renderQueue();
   tickTimer();
   timerInterval = setInterval(tickTimer, 1000);
 }
+
 function tickTimer() {
-  blockSeconds = Math.floor((Date.now() - blockStart) / 1000);
-  var m = Math.floor(blockSeconds / 60), s = blockSeconds % 60;
-  var dur = queue[currentIdx] ? queue[currentIdx].dur * 60 : 1;
-  var pct = Math.min(100, Math.round((blockSeconds / dur) * 100));
-  document.getElementById('timerNum').textContent  = m + ':' + (s < 10 ? '0' : '') + s;
-  document.getElementById('blockFill').style.width = pct + '%';
-  document.getElementById('blockPct').textContent  = pct + '%';
+  if (isPaused) return;
+  var paused = totalPausedMs + (pausedAt ? 0 : 0); /* pausedAt handled in togglePause */
+  blockSeconds = Math.floor((Date.now() - blockStart - totalPausedMs) / 1000);
+  if (blockSeconds < 0) blockSeconds = 0;
+
+  var block  = queue[currentIdx];
+  var durSec = block ? block.dur * 60 : 1;
+  var isHard = getBlockMode() === 'hard';
+  var m, s, pct, timerNum = document.getElementById('timerNum');
+
+  if (isHard) {
+    var remaining = Math.max(0, durSec - blockSeconds);
+    m = Math.floor(remaining / 60); s = remaining % 60;
+    pct = Math.min(100, Math.round((blockSeconds / durSec) * 100));
+    /* urgency colouring */
+    if (timerNum) {
+      timerNum.className = remaining <= 60 ? 'timer-num hard-urgent' :
+                           remaining <= 180 ? 'timer-num hard-warn' : 'timer-num';
+    }
+    /* auto-end when countdown hits zero */
+    if (remaining === 0) {
+      clearInterval(timerInterval);
+      showBlockCompleteModal(true);
+      return;
+    }
+  } else {
+    m = Math.floor(blockSeconds / 60); s = blockSeconds % 60;
+    pct = Math.min(100, Math.round((blockSeconds / durSec) * 100));
+  }
+
+  var numEl = document.getElementById('timerNum');
+  if (numEl) numEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  var fillEl = document.getElementById('blockFill');
+  if (fillEl) fillEl.style.width = pct + '%';
+  var pctEl = document.getElementById('blockPct');
+  if (pctEl) pctEl.textContent = pct + '%';
 }
+
+function togglePause() {
+  if (!isPaused) {
+    /* pause */
+    isPaused = true;
+    pausedAt = Date.now();
+    clearInterval(timerInterval);
+    var btn = document.getElementById('btnPause');
+    var lbl = document.getElementById('pauseLabel');
+    var icon = document.getElementById('pauseIcon');
+    if (btn) btn.classList.add('paused');
+    if (lbl) lbl.textContent = 'Resume';
+    if (icon) icon.innerHTML =
+      '<path d="M5 3l8 5-8 5V3z" fill="currentColor"/>';
+  } else {
+    /* resume */
+    totalPausedMs += Date.now() - (pausedAt || Date.now());
+    pausedAt = null;
+    isPaused = false;
+    var btn = document.getElementById('btnPause');
+    var lbl = document.getElementById('pauseLabel');
+    var icon = document.getElementById('pauseIcon');
+    if (btn) btn.classList.remove('paused');
+    if (lbl) lbl.textContent = 'Pause';
+    if (icon) icon.innerHTML =
+      '<rect x="2" y="2" width="3.5" height="10" rx="1" fill="currentColor"/>' +
+      '<rect x="8.5" y="2" width="3.5" height="10" rx="1" fill="currentColor"/>';
+    timerInterval = setInterval(tickTimer, 1000);
+    tickTimer();
+  }
+}
+
 function endBlock() {
+  /* if paused, resume tracking before ending so final seconds are accurate */
+  if (isPaused) { totalPausedMs += Date.now() - (pausedAt || Date.now()); pausedAt = null; isPaused = false; }
   clearInterval(timerInterval);
-  queue[currentIdx].status = 'done';
+  showBlockCompleteModal(false);
+}
+
+function showBlockCompleteModal(autoEnded) {
+  var block = queue[currentIdx];
+  if (!block) return;
+
+  var secs = Math.floor((Date.now() - blockStart - totalPausedMs) / 1000);
+  if (secs < 0) secs = 0;
+  var m = Math.floor(secs / 60), s = secs % 60;
+  var timeStr = m > 0 ? m + 'min ' + s + 's' : s + 's';
+
+  var icon  = document.getElementById('bcIcon');
+  var title = document.getElementById('bcTitle');
+  var task  = document.getElementById('bcTask');
+  var time  = document.getElementById('bcTime');
+  if (icon)  icon.textContent  = autoEnded ? '⏱️' : '✅';
+  if (title) title.textContent = autoEnded ? 'Time\'s up!' : 'Block finished!';
+  if (task)  task.textContent  = block.title;
+  if (time)  time.innerHTML    = 'Time spent: <strong>' + timeStr + '</strong>';
+
+  document.getElementById('blockCompleteModal').classList.add('open');
+
+  /* store context for the yes/no handlers */
+  blockCompleteCallback = { block: block, secs: secs };
+}
+
+function blockCompleteYes() {
+  document.getElementById('blockCompleteModal').classList.remove('open');
+  var ctx = blockCompleteCallback;
+  if (!ctx) return;
+
+  /* log time */
+  logBlockTime(ctx.block, ctx.secs);
+
+  /* mark task done */
+  if (ctx.block.taskId) {
+    var task = taskList.find(function(t) { return t.id === ctx.block.taskId; });
+    if (task && !task.done) {
+      task.done = true;
+      task.inQueue = false;
+      completionLog.push({
+        id: uid(), taskId: task.id, taskTitle: task.title,
+        projectId: task.projectId || null,
+        assignee: taskAssigneeLabel(task),
+        completedBy: currentUser,
+        completedAt: Date.now(), priority: task.priority
+      });
+      dbUpdateTask(task.id, {done: true, in_queue: false});
+      var logEntry = completionLog[completionLog.length - 1];
+      dbInsertLog(logEntry).then(function(newId) { if (newId) logEntry.id = newId; });
+    }
+  }
+
+  ctx.block.status = 'done';
   celebrate(function() {
     currentIdx++;
-    if (currentIdx < queue.length) {
-      startBlock();
-    } else {
-      /* all done — clear active status */
+    if (currentIdx < queue.length) { startBlock(); }
+    else {
       if (currentUser) dbSetStatus(currentUser, 'Queue complete', false);
       renderQueue();
     }
   });
+  renderTaskList();
+  renderProjectsSidebar();
 }
+
+function blockCompleteNo() {
+  document.getElementById('blockCompleteModal').classList.remove('open');
+  var ctx = blockCompleteCallback;
+  if (!ctx) return;
+
+  /* log time */
+  logBlockTime(ctx.block, ctx.secs);
+
+  /* mark task as in-progress (wip flag) */
+  if (ctx.block.taskId) {
+    var task = taskList.find(function(t) { return t.id === ctx.block.taskId; });
+    if (task) {
+      task.wip = true;
+      dbUpdateTask(task.id, {});  /* trigger a lightweight save — wip is local-only for now */
+    }
+  }
+
+  ctx.block.status = 'done';
+  celebrate(function() {
+    currentIdx++;
+    if (currentIdx < queue.length) { startBlock(); }
+    else {
+      if (currentUser) dbSetStatus(currentUser, 'Queue complete', false);
+      renderQueue();
+    }
+  });
+  renderTaskList();
+}
+
+function logBlockTime(block, secs) {
+  if (!block || secs <= 0) return;
+  var today = new Date().toISOString().split('T')[0];
+  timeLogs.push({
+    id:     uid(),
+    taskId: block.taskId || null,
+    who:    currentUser || 'Unknown',
+    seconds: secs,
+    date:   today
+  });
+}
+
 function skipBlock() {
+  if (isPaused) { totalPausedMs += Date.now() - (pausedAt || Date.now()); pausedAt = null; isPaused = false; }
   clearInterval(timerInterval);
   var skipped = queue.splice(currentIdx, 1)[0];
   skipped.status = 'pending';
@@ -2514,10 +2830,10 @@ function renderTaskList() {
   filtered.forEach(function(task, idx) {
     rows.appendChild(buildTaskRow(task, idx));
   });
-  updateTaskBadge();
-}
+  updateTaskBadge();}
 
 function buildTaskRow(task) {
+  /* ── build the wrapper that holds the row + expandable detail ── */
   var assigneeNames = getTaskAssignees(task);
   var member = TEAM.find(function(m) { return m.name === assigneeNames[0]; }) || {initials:'?', color:'#999', bg:'#eee'};
   var priCls = 'pri-' + task.priority;
@@ -2538,6 +2854,18 @@ function buildTaskRow(task) {
   var queueLabel = task.inQueue ? 'In queue ✓' : '+ Add to queue';
   var queueCls   = task.inQueue ? 'btn-queue in-queue' : 'btn-queue';
 
+  /* time log for this task */
+  var taskLogs = timeLogs.filter(function(l) { return l.taskId === task.id; });
+  var totalSecs = taskLogs.reduce(function(sum, l) { return sum + (l.seconds || 0); }, 0);
+  var logBtnLabel = taskLogs.length
+    ? '⏱ ' + fmtDuration(totalSecs)
+    : '⏱ No time logged';
+
+  /* wip badge */
+  var wipBadge = task.wip && !task.done
+    ? '<span class="badge-wip" style="margin-left:6px;">In progress</span>'
+    : '';
+
   row.innerHTML =
     '<div class="tr-title-wrap">' +
       '<div class="tr-check' + (task.done ? ' checked' : '') + '" onclick="toggleDone(\'' + task.id + '\')">' +
@@ -2545,13 +2873,14 @@ function buildTaskRow(task) {
           '<path d="M1.5 5L4 7.5L8.5 2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
         '</svg>' +
       '</div>' +
-      '<span class="tr-title">' + esc(task.title) + '</span>' +
+      '<span class="tr-title">' + esc(task.title) + '</span>' + wipBadge +
     '</div>' +
     '<div>' + projTag + '</div>' +
     '<div><span class="priority-tag ' + priCls + '">' + priLabel + '</span></div>' +
     '<div class="' + dueCls + '">' + esc(dueText) + '</div>' +
     assigneeCellHtml(task) +
     '<div class="tr-actions">' +
+      '<button class="btn-expand-log" onclick="toggleTimeLog(\'' + task.id + '\')" title="View time log">' + logBtnLabel + '</button>' +
       '<button class="btn-edit-sm" style="font-size:11px;padding:5px 11px;" title="Edit task" onclick="openModal(\'' + task.id + '\')">Edit</button>' +
       (!task.done ? '<button class="' + queueCls + '" onclick="toggleQueue(\'' + task.id + '\')">' + queueLabel + '</button>' : '') +
       '<button class="btn-delete" title="Delete task" onclick="deleteTask(\'' + task.id + '\')">' +
@@ -2570,7 +2899,52 @@ function buildTaskRow(task) {
     });
   }
 
-  return row;
+  /* build the detail/time-log row */
+  var detailRow = document.createElement('div');
+  detailRow.className = 'tr-detail-row';
+  detailRow.id = 'detail-' + task.id;
+  detailRow.innerHTML = buildTimeLogHtml(task.id);
+
+  /* wrap both in a fragment container */
+  var frag = document.createDocumentFragment();
+  frag.appendChild(row);
+  frag.appendChild(detailRow);
+  return frag;
+}
+
+function fmtDuration(secs) {
+  var h = Math.floor(secs / 3600);
+  var m = Math.floor((secs % 3600) / 60);
+  var s = secs % 60;
+  if (h > 0) return h + 'h ' + m + 'm';
+  if (m > 0) return m + 'm ' + s + 's';
+  return s + 's';
+}
+
+function buildTimeLogHtml(taskId) {
+  var logs = timeLogs.filter(function(l) { return l.taskId === taskId; });
+  var html = '<div class="tdr-label">Time logged</div>';
+  if (!logs.length) {
+    return html + '<div class="tdr-empty">No time logged yet. Complete a block to start tracking.</div>';
+  }
+  html += '<div class="tdr-entries">';
+  logs.forEach(function(l) {
+    html += '<div class="tdr-entry">' +
+      '<span class="tdr-who">' + esc(l.who) + '</span>' +
+      '<span class="tdr-dur">' + fmtDuration(l.seconds) + '</span>' +
+      '<span class="tdr-date">' + esc(l.date) + '</span>' +
+    '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function toggleTimeLog(taskId) {
+  var det = document.getElementById('detail-' + taskId);
+  if (!det) return;
+  var isOpen = det.classList.contains('open');
+  det.innerHTML = buildTimeLogHtml(taskId);
+  det.classList.toggle('open', !isOpen);
 }
 
 function toggleDone(id) {
@@ -3246,8 +3620,11 @@ var DAY_LABELS = {mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',fri:'Fri',sat:'Sat',su
 var settings = {
   team: [],
   recurring: [],
-  general: { company: '321floors', weekStart: 'mon' }
+  general: { company: '321floors', weekStart: 'mon', blockMode: 'soft' }
 };
+
+/* per-task time log: { taskId, who, seconds, date } */
+var timeLogs = [];
 
 function loadSettings() {
   /* Settings now come from Supabase — dbBootstrap() handles initial load.
@@ -3259,6 +3636,15 @@ function loadSettings() {
 function persistSettings() {
   /* General settings still use localStorage; team/projects/tasks use Supabase */
   try { localStorage.setItem('321floors_general', JSON.stringify(settings.general)); } catch(e) {}
+}
+
+function loadPersistedGeneral() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('321floors_general') || '{}');
+    if (saved.company)   settings.general.company   = saved.company;
+    if (saved.weekStart) settings.general.weekStart = saved.weekStart;
+    if (saved.blockMode) settings.general.blockMode = saved.blockMode;
+  } catch(e) {}
 }
 
 function syncTeamFromSettings() {
@@ -3987,8 +4373,24 @@ function closeRecurModal() {
 function loadGeneral() {
   document.getElementById('settingCompany').value  = settings.general.company   || '321floors';
   document.getElementById('settingWeekStart').value = settings.general.weekStart || 'mon';
-  /* update wordmarks if company changed */
   applyCompanyName();
+  /* block mode toggle */
+  var mode = settings.general.blockMode || 'soft';
+  var bmtS = document.getElementById('bmtSoft');
+  var bmtH = document.getElementById('bmtHard');
+  var desc = document.getElementById('bmtDesc');
+  if (bmtS) bmtS.classList.toggle('bmt-active', mode === 'soft');
+  if (bmtH) bmtH.classList.toggle('bmt-active', mode === 'hard');
+  if (desc) desc.textContent = mode === 'hard'
+    ? 'Hard block: timer counts down. When time runs out the block ends automatically — no extensions, no pauses. Strict by design.'
+    : 'Soft block: timer counts up with no cap. You can pause at any time and end the block whenever you\'re ready.';
+}
+
+function setBlockMode(mode) {
+  settings.general.blockMode = mode;
+  persistSettings();
+  loadGeneral();
+  showToast(mode === 'hard' ? 'Hard block mode on — strict timers' : 'Soft block mode on — flexible timers');
 }
 
 function saveGeneral() {
@@ -4029,7 +4431,7 @@ function dangerClearRecurring() {
 function dangerReset() {
   if (!confirm('Reset everything to defaults? All data in the database will be wiped.')) return;
   localStorage.removeItem('321floors_general');
-  taskList = []; completionLog = [];
+  taskList = []; completionLog = []; timeLogs = [];
   projects = []; activeProjectFilter = null;
   settings = { team: [], recurring: [], general: { company: '321floors', weekStart: 'mon' } };
   /* clear Supabase tables */
@@ -4075,6 +4477,7 @@ switchTab = function(tab) {
 ════════════════════════════════════════ */
 /* Boot: load all data from Supabase then init settings */
 dbBootstrap().then(function() {
+  loadPersistedGeneral();
   loadSettings();
   rebuildNameDropdown();
   rebuildAssigneeSelects();

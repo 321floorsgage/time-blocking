@@ -426,7 +426,16 @@ body::before {
 .assignee-avatars > div:first-child { margin-left: 0; }
 .shared-pill {
   font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 100px;
-  background: var(--blue-lt); color: var(--blue); margin-left: 6px; white-space: nowrap;
+  background: var(--blue-lt); color: var(--blue); white-space: nowrap; flex-shrink: 0;
+}
+.tr-assignee {
+  display: flex; align-items: center; gap: 5px;
+  min-width: 0; overflow: hidden;
+}
+.tr-aname {
+  font-size: 12px; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0; flex-shrink: 1;
 }
 
 /* task table */
@@ -478,10 +487,6 @@ body::before {
 
 .tr-due { font-size: 12px; color: var(--muted); }
 .tr-due.overdue { color: var(--red); font-weight: 600; }
-
-.tr-assignee { display: flex; align-items: center; gap: 7px; }
-.tr-avatar { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
-.tr-aname { font-size: 12px; color: var(--muted); }
 
 .tr-actions { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
 .btn-queue {
@@ -935,13 +940,10 @@ body::before {
   grid-template-columns: minmax(420px, 1fr) 110px 90px 80px 190px 225px !important;
   min-width: 1220px;
 }
-.tr-assignee { min-width: 0; }
-.tr-aname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tr-actions { flex-wrap: nowrap; white-space: nowrap; }
 .tr-actions .btn-edit-sm { flex-shrink: 0; }
 .tr-actions .btn-queue { flex-shrink: 0; }
 .assignee-avatars > div { width: 22px !important; height: 22px !important; }
-.shared-pill { margin-left: 0; flex-shrink: 0; }
 @media (max-width: 900px) {
   .task-table-head,
   .task-row { min-width: 1120px; grid-template-columns: minmax(340px,1fr) 90px 85px 75px 175px 210px !important; }
@@ -4966,22 +4968,10 @@ function startPlannedDay() {
 }
 
 function skipPlanning() {
-  /* Build a minimal queue from included tasks anyway (all included by default) */
-  var included = planItems.filter(function(p) { return p.included; });
-  queue = included.map(function(item, i) {
-    return {
-      title:  item.title,
-      dur:    item.dur,
-      status: i === 0 ? 'active' : 'pending',
-      taskId: item.taskId,
-      assignees: item.assignees || [],
-      sharedTask: !!item.sharedTask,
-      sharedOrder: i
-    };
-  });
+  /* Skip = go straight to day view with no queue loaded */
+  queue = [];
   currentIdx = 0;
   markPlannedToday();
-  syncSharedPlanBlocks();
   closePlanningScreen();
   initApp();
 }

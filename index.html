@@ -1319,7 +1319,7 @@ body::before {
     <div class="plan-header">
       <div class="plan-wordmark">321 · Floors</div>
       <div class="plan-greeting" id="planGreeting">Plan your day</div>
-      <div class="plan-sub" id="planSub">Here are your open tasks, sorted by priority and due date. Toggle any off, reorder, set durations, then start.</div>
+      <div class="plan-sub" id="planSub">Toggle tasks on or off, adjust durations, reorder, then start your day.</div>
     </div>
 
     <div class="plan-card">
@@ -2442,7 +2442,17 @@ function initApp() {
   /* load current statuses for team panel */
   dbLoadAllStatuses().then(function() { renderTeam(); });
   renderQueue();
-  startBlock();
+  /* only start the timer if there's an active or pending block waiting */
+  var hasActiveBlock = queue.some(function(b) { return b.status === 'active'; });
+  var firstPending = queue.findIndex(function(b) { return b.status === 'pending'; });
+  if (hasActiveBlock) {
+    currentIdx = queue.findIndex(function(b) { return b.status === 'active'; });
+    startBlock();
+  } else if (firstPending >= 0) {
+    currentIdx = firstPending;
+    startBlock();
+  }
+  /* else: empty queue — no timer, user can add tasks manually */
   renderTaskList();
   renderProjectsSidebar();
   buildProjectSelect();

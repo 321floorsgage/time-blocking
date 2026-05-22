@@ -215,6 +215,14 @@ body::before {
 .q-item.q-done .q-title { text-decoration: line-through; color: var(--muted); }
 .q-time { font-size: 10px; color: var(--faint); margin-top: 2px; }
 .q-now { font-size: 10px; font-weight: 600; color: var(--accent); background: var(--accent-lt); padding: 2px 8px; border-radius: 100px; flex-shrink: 0; align-self: center; }
+.q-arrows { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; align-self: center; }
+.q-arrow {
+  width: 20px; height: 18px; background: none; border: none; cursor: pointer;
+  color: var(--faint); display: flex; align-items: center; justify-content: center;
+  border-radius: 4px; transition: background .12s, color .12s; padding: 0;
+}
+.q-arrow:hover { background: var(--border); color: var(--text); }
+.q-arrow:disabled { opacity: .18; cursor: default; pointer-events: none; }
 
 /* ── Main col ── */
 .main-col { display: flex; flex-direction: column; gap: 14px; }
@@ -2431,23 +2439,45 @@ function renderQueue() {
   document.getElementById('statPct').textContent  = pct + '%';
   document.getElementById('statLeft').textContent = Math.max(0, total - done);
 
-  queue.forEach(function(block) {
+  /* find the bounds that pending blocks can move within —
+     can't move above the active block or into done territory */
+  var firstMovable = queue.findIndex(function(b) { return b.status === 'pending'; });
+  var lastMovable  = queue.length - 1;
+
+  queue.forEach(function(block, idx) {
     var el  = document.createElement('div');
     var dot = block.status === 'done' ? 'dot-done' : block.status === 'active' ? 'dot-active' : 'dot-pending';
     el.className = 'q-item' + (block.status === 'done' ? ' q-done' : block.status === 'active' ? ' q-active' : '');
-    /* project dot for queue items */
+
     var qProj = block.taskId ? taskList.find(function(t) { return t.id === block.taskId; }) : null;
     var qProjObj = (qProj && qProj.projectId) ? projects.find(function(p) { return p.id === qProj.projectId; }) : null;
     var projDotHtml = qProjObj
       ? '<div class="q-proj-dot" style="background:' + qProjObj.color + '" title="' + esc(qProjObj.name) + '"></div>'
       : '';
+
+    var isPending = block.status === 'pending';
+    var canUp   = isPending && idx > firstMovable;
+    var canDown = isPending && idx < lastMovable;
+
+    var arrowsHtml = isPending
+      ? '<div class="q-arrows">' +
+          '<button class="q-arrow" onclick="moveQueueBlock(' + idx + ',-1)" ' + (canUp   ? '' : 'disabled') + ' title="Move up">' +
+            '<svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M2 7l3-4 3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</button>' +
+          '<button class="q-arrow" onclick="moveQueueBlock(' + idx + ',1)" '  + (canDown ? '' : 'disabled') + ' title="Move down">' +
+            '<svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M2 3l3 4 3-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</button>' +
+        '</div>'
+      : '';
+
     el.innerHTML =
       '<div class="q-dot ' + dot + '"></div>' +
       '<div class="q-text">' +
         '<div class="q-title">' + esc(block.title) + '</div>' +
         '<div class="q-time" style="display:flex;align-items:center;gap:5px;">' + projDotHtml + block.dur + ' min' + (block.sharedTask ? ' · Shared' : '') + '</div>' +
       '</div>' +
-      (block.status === 'active' ? '<span class="q-now">now</span>' : '');
+      (block.status === 'active' ? '<span class="q-now">now</span>' : arrowsHtml);
+
     list.appendChild(el);
   });
 
@@ -2464,6 +2494,18 @@ function renderQueue() {
   document.getElementById('activeCard').style.display  = allComplete ? 'none' : 'block';
   document.getElementById('allDoneCard').classList.toggle('visible', allComplete);
   if (allComplete) clearInterval(timerInterval);
+}
+
+function moveQueueBlock(idx, dir) {
+  var target = idx + dir;
+  /* guard: target must exist and be a pending block */
+  if (target < 0 || target >= queue.length) return;
+  if (queue[target].status !== 'pending') return;
+  /* swap */
+  var tmp = queue[idx];
+  queue[idx] = queue[target];
+  queue[target] = tmp;
+  renderQueue();
 }
 
 /* ════════════════════════════════════════

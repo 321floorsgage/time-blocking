@@ -1279,6 +1279,20 @@ body::before {
 </div>
 
 
+<!-- DELETE CONFIRM MODAL -->
+<div class="block-complete-backdrop" id="deleteConfirmModal">
+  <div class="block-complete-box" style="max-width:380px;">
+    <div class="bc-icon">🗑️</div>
+    <div class="bc-title">Delete this task?</div>
+    <div class="bc-task" id="deleteConfirmTitle"></div>
+    <div class="bc-time" style="margin-bottom:26px;">This cannot be undone.</div>
+    <div class="bc-btns">
+      <button class="btn-bc-no" style="background:var(--red-dim);color:var(--red);border-color:rgba(184,64,64,.25);" onclick="deleteConfirmYes()">Yes, delete it</button>
+      <button class="btn-bc-no" onclick="deleteConfirmNo()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- BLOCK COMPLETE MODAL -->
 <div class="block-complete-backdrop" id="blockCompleteModal">
   <div class="block-complete-box">
@@ -2265,6 +2279,7 @@ var isPaused      = false;
 var pausedAt      = null;
 var totalPausedMs = 0;
 var blockCompleteCallback = null;
+var workEndTimeout = null;
 
 /* ── hoisted project/log declarations (used by seedTasks below) ── */
 var PROJECT_COLORS = [
@@ -2340,12 +2355,34 @@ function login() {
         /* restore saved plan */
         queue = savedQueue;
         currentIdx = 0;
+        /* sync inQueue flags — clear any tasks that are marked inQueue
+           but are not actually in the restored queue (app was closed mid-day) */
+        var queuedTaskIds = queue.map(function(b) { return b.taskId; }).filter(Boolean);
+        taskList.forEach(function(task) {
+          if (task.inQueue && queuedTaskIds.indexOf(task.id) === -1) {
+            task.inQueue = false;
+            dbUpdateTask(task.id, { in_queue: false });
+          }
+        });
         markPlannedToday();
         document.getElementById('app').classList.add('visible');
         initApp();
       } else if (!hasPlannedToday()) {
+        /* also clear any stale inQueue flags before planning screen */
+        taskList.forEach(function(task) {
+          if (task.inQueue) {
+            task.inQueue = false;
+            dbUpdateTask(task.id, { in_queue: false });
+          }
+        });
         openPlanningScreen();
       } else {
+        taskList.forEach(function(task) {
+          if (task.inQueue) {
+            task.inQueue = false;
+            dbUpdateTask(task.id, { in_queue: false });
+          }
+        });
         document.getElementById('app').classList.add('visible');
         initApp();
       }
@@ -2515,8 +2552,29 @@ function getBlockMode() {
   return (settings.general && settings.general.blockMode) || 'soft';
 }
 
+function scheduleWorkEndStop() {
+  clearTimeout(workEndTimeout);
+  var member = settings.team.find(function(m) { return m.name === currentUser; });
+  if (!member || !member.end) return; /* no end time set — don't schedule */
+  var parts = member.end.split(':');
+  if (parts.length < 2) return;
+  var now = new Date();
+  var endToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                          parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+  var msUntilEnd = endToday - now;
+  if (msUntilEnd <= 0) return; /* already past end of day */
+  workEndTimeout = setTimeout(function() {
+    /* end of day reached — stop the active block */
+    if (isPaused) { totalPausedMs += Date.now() - (pausedAt || Date.now()); pausedAt = null; isPaused = false; }
+    clearInterval(timerInterval);
+    showToast('Work hours ended — stopping active block');
+    showBlockCompleteModal(true);
+  }, msUntilEnd);
+}
+
 function startBlock() {
   clearInterval(timerInterval);
+  clearTimeout(workEndTimeout);
   isPaused = false; pausedAt = null; totalPausedMs = 0;
   blockSeconds = 0; blockStart = Date.now();
   var block = queue[currentIdx];
@@ -2547,6 +2605,7 @@ function startBlock() {
   renderQueue();
   tickTimer();
   timerInterval = setInterval(tickTimer, 1000);
+  scheduleWorkEndStop();
 }
 
 function tickTimer() {
@@ -2623,6 +2682,7 @@ function endBlock() {
   /* if paused, resume tracking before ending so final seconds are accurate */
   if (isPaused) { totalPausedMs += Date.now() - (pausedAt || Date.now()); pausedAt = null; isPaused = false; }
   clearInterval(timerInterval);
+  clearTimeout(workEndTimeout);
   showBlockCompleteModal(false);
 }
 
@@ -2734,6 +2794,7 @@ function logBlockTime(block, secs) {
 function skipBlock() {
   if (isPaused) { totalPausedMs += Date.now() - (pausedAt || Date.now()); pausedAt = null; isPaused = false; }
   clearInterval(timerInterval);
+  clearTimeout(workEndTimeout);
   var skipped = queue.splice(currentIdx, 1)[0];
   skipped.status = 'pending';
   queue.push(skipped);
@@ -3093,7 +3154,22 @@ function toggleQueue(id) {
   renderTaskList();
 }
 
+var pendingDeleteId = null;
+
 function deleteTask(id) {
+  var task = taskList.find(function(t) { return t.id === id; });
+  if (!task) return;
+  pendingDeleteId = id;
+  var titleEl = document.getElementById('deleteConfirmTitle');
+  if (titleEl) titleEl.textContent = task.title.length > 60 ? task.title.slice(0, 60) + '…' : task.title;
+  document.getElementById('deleteConfirmModal').classList.add('open');
+}
+
+function deleteConfirmYes() {
+  document.getElementById('deleteConfirmModal').classList.remove('open');
+  var id = pendingDeleteId;
+  pendingDeleteId = null;
+  if (!id) return;
   var task = taskList.find(function(t) { return t.id === id; });
   if (task) removeSharedTaskBlockFromAssignees(task);
   taskList = taskList.filter(function(t) { return t.id !== id; });
@@ -3103,6 +3179,11 @@ function deleteTask(id) {
   renderQueue();
   updateTaskBadge();
   showToast('Task deleted');
+}
+
+function deleteConfirmNo() {
+  document.getElementById('deleteConfirmModal').classList.remove('open');
+  pendingDeleteId = null;
 }
 
 function updateTaskBadge() {
